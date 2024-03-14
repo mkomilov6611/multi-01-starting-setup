@@ -1,0 +1,37 @@
+version: '3.8'
+services:
+  mongodb:
+    image: "mongo"
+    volumes:
+      - "data:/data/db"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: secret
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      # named volume to store logs 
+      - logs:/app/log
+      # bind mount the backend code to the container
+      - ./backend:/app
+      # anonymous volume to store node_modules
+      - /app/node_modules
+    environment:
+      MONGODB_USERNAME: root
+      MONGODB_PASSWORD: secret
+    depends_on:
+      - mongodb
+  frontend:
+    build: ./frontend
+    ports:
+      - "4000:3000"
+    volumes:
+      # bind mount the frontend code to the container
+      - ./frontend/src:/app/src
+    depends_on:
+      - backend
+volumes:
+  data:
+  logs:
